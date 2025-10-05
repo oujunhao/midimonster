@@ -583,6 +583,23 @@ static channel* osc_map_channel(instance* inst, char* spec, uint8_t flags){
 		.label = 0
 	};
 
+	//find last single colon (not part of ::) for parameter offset
+	char* param_separator = NULL;
+	for(u = 0; spec[u]; u++){
+		if(spec[u] == ':' && spec[u + 1] != ':'){
+			param_separator = spec + u;
+		}
+		else if(spec[u] == ':' && spec[u + 1] == ':'){
+			u++; //skip the second colon in ::
+		}
+	}
+
+	//parse parameter offset
+	if(param_separator){
+		ident.fields.parameter = strtoul(param_separator + 1, NULL, 10);
+		*param_separator = 0;
+	}
+
 	//unescape double colons
 	for(u = 0, p = 0; spec[u]; u++){
 		if(spec[u] == ':' && spec[u + 1] == ':'){
@@ -595,12 +612,6 @@ static channel* osc_map_channel(instance* inst, char* spec, uint8_t flags){
 	//check spec for correctness
 	if(osc_path_validate(spec, 0)){
 		return NULL;
-	}
-
-	//parse parameter offset
-	if(strrchr(spec, ':')){
-		ident.fields.parameter = strtoul(strrchr(spec, ':') + 1, NULL, 10);
-		*(strrchr(spec, ':')) = 0;
 	}
 
 	//find matching channel
