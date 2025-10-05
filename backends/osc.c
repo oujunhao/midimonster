@@ -583,6 +583,15 @@ static channel* osc_map_channel(instance* inst, char* spec, uint8_t flags){
 		.label = 0
 	};
 
+	//unescape double colons
+	for(u = 0, p = 0; spec[u]; u++){
+		if(spec[u] == ':' && spec[u + 1] == ':'){
+			u++;
+		}
+		spec[p++] = spec[u];
+	}
+	spec[p] = 0;
+
 	//check spec for correctness
 	if(osc_path_validate(spec, 0)){
 		return NULL;
